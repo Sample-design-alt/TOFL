@@ -12,9 +12,9 @@ class InceptionTime(pl.LightningModule):
                  bottleneck_channels=32, activation=nn.ReLU(), use_residual=True):
         super(InceptionTime, self).__init__()
         self.learning_rate = learning_rate
-        self.train_accuracy = Accuracy()
-        self.val_accuracy = Accuracy()
-        self.test_accuracy = Accuracy()
+        self.train_accuracy = Accuracy( num_classes=num_classes)
+        self.val_accuracy = Accuracy(num_classes=num_classes)
+        self.test_accuracy = Accuracy(num_classes=num_classes)
         self.inception_blocks = []
         for i, n_filter in enumerate(n_filters):
             inception_block = None

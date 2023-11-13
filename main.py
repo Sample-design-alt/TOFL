@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 # Insectwingbeatsound
 # 'K': 4, 'alpha': 0.4, 'lr': 0.009965871215045658, 'weight_decay': 2.1222791196923615e-06, 'feature': 64, 'kernel': 5
 
-import os
-
+import datetime
 from optim.pretrain import *
+import argparse
+
 from utils.parse import parse_option
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
 import torch
 from utils.utils import log_file
 from optim.train import supervised_train
@@ -16,23 +18,25 @@ from glob import glob
 
 Train_Done = []
 
+
 if __name__ == "__main__":
     import os
     import numpy as np
     import yaml
 
+    Train_Done = os.listdir('./results/exp-cls/TSC/')
     opt = parse_option()
 
     config_path = './experiments/config/{0}.yaml'.format(opt.model_name)
     configuration = yaml.safe_load(open(config_path, 'r'))
     # label_list=[0.6,0.7,0.8,0.9]
-    # label_list = [ 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     label_list = [1]
+    # label_list = [1]
     for i in range(len(label_list)):
         configuration['data_params']['label_ratio'] = label_list[i]
         exp = 'exp-cls'
 
-        Seeds = [0, 1]
+        Seeds = [2]
         Runs = range(0, 2, 1)
 
         aug1 = ['magnitude_warp']
@@ -72,23 +76,17 @@ if __name__ == "__main__":
             print('[INFO] Running at:', opt.dataset_name)
 
             if opt.dataset_name == 'TSC':
-                opt.ucr_path = './dataloader/TSC'
+                opt.ucr_path = './datasets/TSC'
                 TSC_archive = glob(opt.ucr_path + '/*')
                 for i in range(len(TSC_archive)):
                     dataset_name = TSC_archive[i].split('/')[-1]
                     log_dir = './results/{}/{}/{}/{}/{}'.format(
                         exp, opt.dataset_name, dataset_name, opt.model_name, model_paras)
                     file2print_detail_train, file2print, file2print_detail = log_file(log_dir)
-
                     if dataset_name in Train_Done:
                         continue
-
-                    if opt.val == True:
-                        x_train, y_train, x_val, y_val, x_test, y_test, configuration['data_params']['nb_class'], _ \
-                            = load_ucr2018(opt.ucr_path, dataset_name)
-                    else:
-                        x_train, y_train, x_val, y_val, x_test, y_test, configuration['data_params']['nb_class'], _ \
-                            = load_ucr2018_without_resplit(opt.ucr_path, dataset_name)
+                    x_train, y_train, x_val, y_val, x_test, y_test, configuration['data_params']['nb_class'], _ \
+                        = load_ucr2018(opt.ucr_path, dataset_name)
                     ACCs_run = {}
                     MAX_EPOCHs_run = {}
                     for run in Runs:
@@ -97,8 +95,8 @@ if __name__ == "__main__":
                         ## Train #######
                         ################
 
-                        if 'SemiSOP' in opt.model_name:
-                            acc_test, acc_unlabel, epoch_max = train_SemiTime(
+                        if 'TOFL' in opt.model_name:
+                            acc_test, acc_unlabel, epoch_max = train_TOFL(
                                 x_train, y_train, x_val, y_val, x_test, y_test, opt, configuration)
 
                         print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
@@ -122,10 +120,10 @@ if __name__ == "__main__":
 
                 ACCs_seed_mean = round(np.mean(list(ACCs_seed.values())), 2)
                 ACCs_seed_std = round(np.std(list(ACCs_seed.values())), 2)
-                MAX_EPOCHs_seed_max = np.max(list(MAX_EPOCHs_seed.values()))
+                # MAX_EPOCHs_seed_max = np.max(list(MAX_EPOCHs_seed.values()))
 
-                print("{}\t{}\t{}\t{}".format(
-                    opt.dataset_name, ACCs_seed_mean, ACCs_seed_std, MAX_EPOCHs_seed_max),
+                print("{}\t{}\t{}".format(
+                    opt.dataset_name, ACCs_seed_mean, ACCs_seed_std),
                     file=file2print)
                 file2print.flush()
             else:
@@ -143,8 +141,8 @@ if __name__ == "__main__":
                             x_train, y_train, x_val, y_val, x_test, y_test, opt, configuration)
                         acc_unlabel = 0
 
-                    elif opt.model_name == 'SemiSOP':
-                        acc_test, acc_unlabel, epoch_max = train_SemiTime(
+                    elif opt.model_name == 'TOFL':
+                        acc_test, acc_unlabel, epoch_max = train_TOFL(
                             x_train, y_train, x_val, y_val, x_test, y_test, opt, configuration)
 
                     print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
@@ -168,9 +166,9 @@ if __name__ == "__main__":
 
             ACCs_seed_mean = round(np.mean(list(ACCs_seed.values())), 2)
             ACCs_seed_std = round(np.std(list(ACCs_seed.values())), 2)
-            MAX_EPOCHs_seed_max = np.max(list(MAX_EPOCHs_seed.values()))
+            # MAX_EPOCHs_seed_max = np.max(list(MAX_EPOCHs_seed.values()))
 
-            print("{}\t{}\t{}\t{}".format(
-                opt.dataset_name, ACCs_seed_mean, ACCs_seed_std, MAX_EPOCHs_seed_max),
+            print("{}\t{}\t{}".format(
+                opt.dataset_name, ACCs_seed_mean, ACCs_seed_std),
                 file=file2print)
             file2print.flush()

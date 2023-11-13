@@ -6,10 +6,10 @@ import torch.nn as nn
 
 
 
-class Model_SemiTime(torch.nn.Module):
+class TOFL(torch.nn.Module):
 
     def __init__(self, backbone, config,feature_size=64, nb_class=3,):
-        super(Model_SemiTime, self).__init__()
+        super(TOFL, self).__init__()
         self.backbone = backbone
         self.relation_head = torch.nn.Sequential(
             torch.nn.Linear(config['model_params']['feature'] * 2, 256),

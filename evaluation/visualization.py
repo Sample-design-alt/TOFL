@@ -2,15 +2,16 @@ from optim.pretrain import *
 from dataloader.ucr2018 import load_ucr2018
 import yaml
 from utils.tsne import gather_all_by_tsne
+from sklearn.preprocessing import MinMaxScaler
 
 #  2022-03-17 14:23:51,238] Trial 47 finished with value: 71.79487609863281 and parameters: {'K': 8, 'alpha': 0.1, 'lr': 0.00934719358698068, 'weight_decay': 1.0765539027448453e-07, 'feature': 128, 'kernel': 7}. Best is trial 47 with value: 71.79487609863281.
 
 
 ucr_path = '../datasets/'
 dataset_name = 'CricketX'
-model='supervised'
+model = 'supervised'
 
-if model=='SemiCOP':
+if model == 'SemiCOP':
     ckpt_backbone = r'/data/chenrj/semi-order-time/ckpt/exp-cls/SemiSOP/CricketX/magnitude_warp_time_warp/label1_0.5/1/backbone_best.tar'
     ckpt_cls_head = r'/data/chenrj/semi-order-time/ckpt/exp-cls/SemiSOP/CricketX/magnitude_warp_time_warp/label1_0.5/1/classification_head_best.tar'
 else:
@@ -20,6 +21,10 @@ else:
 config_path = '../experiments/config/{0}.yaml'.format(model)
 configuration = yaml.safe_load(open(config_path, 'r'))
 x_train, y_train, x_val, y_val, x_test, y_test, nb_class, _ = load_ucr2018(ucr_path, dataset_name)
+
+mms = MinMaxScaler()
+mms.fit(x_test)
+x_test = mms.transform(x_test)
 tensor_transform = transforms.ToTensor()
 val_set = UCR2018(data=x_val, targets=y_val, transform=tensor_transform)
 test_set = UCR2018(data=x_test, targets=y_test, transform=tensor_transform)
@@ -34,8 +39,8 @@ checkpoint = torch.load(ckpt_cls_head, map_location='cpu')
 sup_head = torch.nn.Sequential(
     torch.nn.Linear(configuration['model_params']['feature'], nb_class),
 ).cuda()
-checkpoint['0.weight']=checkpoint['weight']
-checkpoint['0.bias']=checkpoint['bias']
+checkpoint['0.weight'] = checkpoint['weight']
+checkpoint['0.bias'] = checkpoint['bias']
 del checkpoint['bias']
 del checkpoint['weight']
 
@@ -57,7 +62,7 @@ for i, (data, target) in enumerate(test_loader_lineval):
     all_sample_X.append(feature)
     all_sample_Y.append(target)
 
-print('Acc:',sum(acc_vals) / len(acc_vals))
+print('Acc:', sum(acc_vals) / len(acc_vals))
 # estimate the accuracy
 
 all_sample_X = torch.cat(all_sample_X, dim=0).cpu().detach().numpy()

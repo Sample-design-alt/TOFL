@@ -11,6 +11,8 @@ import utils.transforms as transforms_ts
 from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
 from model.model_res_backbone import Resv4
+from model.inception.inceptiontime import InceptionTime
+from model.GTF import GTF
 def run_test(predict, labels):
     correct = 0
     pred = predict.data.max(1)[1]
@@ -97,7 +99,11 @@ def semisupervised_train(x_train, y_train, x_val, y_val, x_test, y_test, opt,con
     test_loader_lineval = torch.utils.data.DataLoader(test_set, batch_size=128, shuffle=False)
 
     # loading the saved backbone
-    backbone = Resv4(config=config).cuda()  # defining a raw backbone model
+    if opt.backbone == 'GTF':
+        backbone = GTF(config=config).cuda()  # defining a raw backbone model
+    else:
+        backbone = Resv4(config=config).cuda()
+
 
     # 64 are the number of output features in the backbone, and 10 the number of classes
     linear_layer = torch.nn.Linear(opt.feature_size, opt.nb_class).cuda()
@@ -291,7 +297,10 @@ def supervised_train(x_train, y_train, x_val, y_val, x_test, y_test, opt,config)
     test_loader_lineval = torch.utils.data.DataLoader(test_set_lineval, batch_size=128, shuffle=False)
 
     # loading the saved backbone
-    backbone_lineval =  Resv4(config=config).cuda()  # defining a raw backbone model
+    if opt.model_name in ['SemiTime', 'supervised']:
+        backbone_lineval = SimConv4(config=config).cuda()
+    elif opt.model_name == 'TOFL':
+        backbone_lineval = InceptionTime(1, config['data_params']['nb_class']).cuda()
 
     # 64 are the number of output features in the backbone, and 10 the number of classes
     linear_layer = torch.nn.Linear(128, config['data_params']['nb_class']).cuda()
