@@ -1,0 +1,9 @@
+model_params:
+  activation: leakyrelu
+  feature: 128
+  d_model: 128
+  kernel: 7
+  l1: 8
+  l2: 16
+  l3: 32
+  nb_class: 4

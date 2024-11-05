@@ -1,0 +1,44 @@
+data_params:
+  K: 4
+  alpha: 0.5
+  label_ratio: 1
+exp_params:
+  lr: 0.001
+  weight_decay: 0.0
+model_params:
+  activation: leakyrelu
+  feature: 128
+  kernel: 7
+  l1: 8
+  l2: 16
+  l3: 32
+  nb_class: 4
+search_space:
+    K:
+        low: 2
+        high: 8
+        step: 1
+        type: "int"
+    alpha:
+        low: 0.1
+        high: 0.9
+        step: 0.1
+        type: "float"
+    lr:
+        low: 0.001
+        high: 0.01
+        type: "log"
+    weight_decay:
+        low: 0.0000001
+        high: 0.001
+        type: "log"
+    feature:
+        low: 32
+        high: 128
+        step: 16
+        type: "int"
+    kernel:
+        low: 3
+        high: 9
+        step: 2
+        type: "int"

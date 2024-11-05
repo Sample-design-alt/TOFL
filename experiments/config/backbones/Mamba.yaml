@@ -1,0 +1,9 @@
+model_params:
+  activation: leakyrelu
+  d_model: 128
+  d_state: 16
+  d_conv: 4
+  expand: 2
+  num_layers: 2
+  enc_in: 1
+  nb_class: 4
