@@ -1,7 +1,5 @@
 # Trend and Order Features for Semi-supervised Time Series Classification via Multi-task Learning
 
-UniTS is a unified time series model that can process various tasks across multiple domains with shared parameters and does not have any task-specific modules.
-
 Authors: [Rongjun chen](https://scholar.google.cz/citations?hl=zh-CN&user=8O_9j3EAAAAJ), Xuanhui Yan, [Guobao Xiao](https://scholar.google.cz/citations?hl=zh-CN&user=YC2B2OEAAAAJ), Yi Hou, Shilin Zhou
 
 ## Overview
